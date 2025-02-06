@@ -10,6 +10,7 @@ impl FromStr for NetIoCounters {
 	type Err = Error;
 
 	fn from_str(line: &str) -> Result<Self> {
+		// println!("{}",line);
 		let fields = match line.split_whitespace().collect::<Vec<_>>() {
 			fields if fields.len() >= 17 => Ok(fields),
 			_ => Err(Error::MissingData {
@@ -54,10 +55,66 @@ pub(crate) fn net_io_counters_pernic() -> Result<HashMap<String, NetIoCounters>>
 			}
 
 			let mut net_name = String::from(fields[0]);
-			// remove the trailing colon
+			// 去掉末尾的冒号
 			net_name.pop();
 
 			Ok((net_name, NetIoCounters::from_str(line)?))
 		})
 		.collect()
+}
+
+fn get_name() ->Vec<String> {
+	read_file(PROC_NET_DEV).unwrap()
+		.lines()
+		.skip(2)
+		.map(|line| {
+			let fields: Vec<&str> = line.split_whitespace().collect();
+			let mut net_name = String::from(fields[0]);
+			// 去掉末尾的冒号
+			net_name.pop();
+			net_name
+		}).collect()
+}
+
+/// 可以指定网卡
+pub(crate) fn this_net_io_counters_pernic1(name:&str) -> Result<HashMap<String, NetIoCounters>> {
+	if !get_name().contains(&name.to_string()){
+		return Err(Error::MissingData {
+			path: PROC_NET_DEV.into(),
+			contents: String::from("指定的网卡不存在！"),
+		});
+	}
+	
+	read_file(PROC_NET_DEV)?
+		.lines()
+		.skip(2)
+		.filter(|line|{
+			let fields: Vec<&str> = line.split_whitespace().collect();
+
+			let mut net_name = String::from(fields[0]);
+			// 去掉末尾的冒号
+			net_name.pop();
+			if net_name == name{
+				true
+			}else {
+				false
+			}
+		}).map(|line| {
+			let fields: Vec<&str> = line.split_whitespace().collect();
+
+			if fields.len() < 17 {
+				return Err(Error::MissingData {
+					path: PROC_NET_DEV.into(),
+					contents: line.to_string(),
+				});
+			}
+
+			let mut net_name = String::from(fields[0]);
+			// 去掉末尾的冒号
+			net_name.pop();
+
+			Ok((net_name, NetIoCounters::from_str(line)?))
+		})
+		.collect()
+		
 }

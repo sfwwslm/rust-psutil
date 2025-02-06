@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use derive_more::{Add, Sub, Sum};
 
 use crate::network::net_io_counters_pernic;
+use crate::network::this_net_io_counters_pernic1;
 use crate::{Bytes, Count, Result};
 
 #[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
@@ -124,34 +125,65 @@ fn fix_io_counter_overflow(
 		.collect()
 }
 
-/// Used to persist data between calls to detect data overflow by the kernel and fix the result.
+/// 用于在调用之间持久化数据，以检测内核的数据溢出并修正结果。
 #[derive(Debug, Clone, Default)]
 pub struct NetIoCountersCollector {
-	prev_net_io_counters_pernic: Option<HashMap<String, NetIoCounters>>,
-	corrected_net_io_counters_pernic: Option<HashMap<String, NetIoCounters>>,
+    // 之前每个网络接口的网络 I/O 计数器
+    prev_net_io_counters_pernic: Option<HashMap<String, NetIoCounters>>,
+    // 修正后每个网络接口的网络 I/O 计数器
+    corrected_net_io_counters_pernic: Option<HashMap<String, NetIoCounters>>,
 }
 
 impl NetIoCountersCollector {
-	pub fn net_io_counters(&mut self) -> Result<NetIoCounters> {
-		let sum = self.net_io_counters_pernic()?.into_values().sum();
+    /// 获取所有网络接口的网络 I/O 计数器总和。
+    pub fn net_io_counters(&mut self) -> Result<NetIoCounters> {
+        let sum = self.net_io_counters_pernic()?.into_values().sum();
 
-		Ok(sum)
-	}
+        Ok(sum)
+    }
 
-	pub fn net_io_counters_pernic(&mut self) -> Result<HashMap<String, NetIoCounters>> {
-		let io_counters = net_io_counters_pernic()?;
+	/// 获取网络接口的网络 I/O 计数器总和。
+    pub fn this_net_io_counters(&mut self, name:&str) -> Result<NetIoCounters> {
+        let sum = self.this_net_io_counters_pernic(name)?.into_values().sum();
 
-		let corrected_counters = match (
-			&self.prev_net_io_counters_pernic,
-			&self.corrected_net_io_counters_pernic,
-		) {
-			(Some(prev), Some(corrected)) => fix_io_counter_overflow(prev, &io_counters, corrected),
-			_ => io_counters.clone(),
-		};
+        Ok(sum)
+    }
 
-		self.prev_net_io_counters_pernic = Some(io_counters);
-		self.corrected_net_io_counters_pernic = Some(corrected_counters.clone());
 
-		Ok(corrected_counters)
-	}
+    /// 获取每个网络接口的网络 I/O 计数器。
+    pub fn net_io_counters_pernic(&mut self) -> Result<HashMap<String, NetIoCounters>> {
+        let io_counters = net_io_counters_pernic()?;
+
+        let corrected_counters = match (
+            &self.prev_net_io_counters_pernic,
+            &self.corrected_net_io_counters_pernic,
+        ) {
+            (Some(prev), Some(corrected)) => fix_io_counter_overflow(prev, &io_counters, corrected),
+            _ => io_counters.clone(),
+        };
+
+        self.prev_net_io_counters_pernic = Some(io_counters);
+        self.corrected_net_io_counters_pernic = Some(corrected_counters.clone());
+
+        Ok(corrected_counters)
+    }
+
+	/// 获取指定网络接口的网络 I/O 计数器。
+    pub fn this_net_io_counters_pernic(&mut self, name:&str) -> Result<HashMap<String, NetIoCounters>> {
+        let io_counters = this_net_io_counters_pernic1(name)?;
+
+        let corrected_counters = match (
+            &self.prev_net_io_counters_pernic,
+            &self.corrected_net_io_counters_pernic,
+        ) {
+            (Some(prev), Some(corrected)) => fix_io_counter_overflow(prev, &io_counters, corrected),
+            _ => io_counters.clone(),
+        };
+
+        self.prev_net_io_counters_pernic = Some(io_counters);
+        self.corrected_net_io_counters_pernic = Some(corrected_counters.clone());
+
+        Ok(corrected_counters)
+    }
 }
+

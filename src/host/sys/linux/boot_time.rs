@@ -24,6 +24,7 @@ fn parse_boot_time(line: &str) -> Result<SystemTime> {
 }
 
 // TODO: cache with https://github.com/jaemk/cached once `pub fn` is supported
+/// 系统引导时间
 pub fn boot_time() -> Result<SystemTime> {
 	let contents = read_file(PROC_STAT)?;
 	let line = contents

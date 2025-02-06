@@ -1,4 +1,6 @@
 mod info;
+
+/// 平均负载信息
 mod loadavg;
 mod sys;
 mod user;

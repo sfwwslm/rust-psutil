@@ -7,6 +7,7 @@ use platforms::target::{Arch, OS};
 
 use crate::host::Info;
 
+/// 主机系统信息。
 pub fn info() -> Info {
 	let utsname = sys::utsname::uname().unwrap();
 

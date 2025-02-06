@@ -8,6 +8,7 @@ const PROC_LOADAVG: &str = "/proc/loadavg";
 impl FromStr for LoadAvg {
 	type Err = Error;
 
+	/// 将字符串解析为 LoadAvg 结构体
 	fn from_str(s: &str) -> Result<Self> {
 		let fields = match s.split_whitespace().collect::<Vec<_>>() {
 			fields if fields.len() >= 3 => Ok(fields),
@@ -17,6 +18,7 @@ impl FromStr for LoadAvg {
 			}),
 		}?;
 
+		// 解析字符串为浮点数，返回 Result<f64>
 		let parse = |s: &str| -> Result<f64> {
 			s.parse().map_err(|err| Error::ParseFloat {
 				path: PROC_LOADAVG.into(),
@@ -29,10 +31,12 @@ impl FromStr for LoadAvg {
 		let five = parse(fields[1])?;
 		let fifteen = parse(fields[2])?;
 
+		// 返回解析后的 LoadAvg 结构体
 		Ok(LoadAvg { one, five, fifteen })
 	}
 }
 
+/// 系统平均负载，统计最近1，5，15分钟的系统平均负载
 pub fn loadavg() -> Result<LoadAvg> {
 	LoadAvg::from_str(&read_file(PROC_LOADAVG)?)
 }
@@ -46,7 +50,7 @@ mod unit_tests {
 	#[test]
 	fn test_loadaverage() {
 		let loadavg = loadavg().unwrap();
-		// shouldn't be negative
+		// 平均负载不应为负数
 		assert!(loadavg.one >= 0.0);
 		assert!(loadavg.five >= 0.0);
 		assert!(loadavg.fifteen >= 0.0);
@@ -56,6 +60,7 @@ mod unit_tests {
 	fn test_parse_loadavg() {
 		let input = "0.49 0.70 0.84 2/519 1454\n";
 		let loadavg = LoadAvg::from_str(input).unwrap();
+		// 检查解析结果是否正确
 		assert!(approx_eq!(FloatCount, loadavg.one, 0.49));
 		assert!(approx_eq!(FloatCount, loadavg.five, 0.70));
 		assert!(approx_eq!(FloatCount, loadavg.fifteen, 0.84));

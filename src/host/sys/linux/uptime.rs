@@ -23,7 +23,8 @@ fn parse_uptime(contents: &str) -> Result<Duration> {
 	Ok(uptime)
 }
 
-/// New function, not in Python psutil.
+// New function, not in Python psutil.
+/// 系统从启动到现在的总运行时间，以秒为单位。
 pub fn uptime() -> Result<Duration> {
 	parse_uptime(&read_file(PROC_UPTIME)?)
 }
