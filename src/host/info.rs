@@ -47,7 +47,7 @@ impl Info {
 			"release": self.release,
 			"version": self.version,
 			"hostname": self.hostname,
-			"architecture": self.architecture.to_string(),
+			"architecture": self.architecture.unwrap().to_string(),
 		});
 		john
 	}
