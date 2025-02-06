@@ -10,7 +10,7 @@ description = "Process and system monitoring library"
 repository = "https://github.com/rust-psutil/rust-psutil"
 readme = "README.md"
 license = "MIT"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 cfg-if = "1.0.0"
@@ -33,7 +33,7 @@ darwin-libproc = { version = "0.2.0", optional = true }
 mach2 = { version = "0.4.1", optional = true }
 
 [features]
-default = ["cpu", "disk", "host", "memory", "network", "process", "sensors"]
+default = ["cpu", "disk", "host", "memory", "network", "process", "sensors", "serde"]
 serde = ["renamed_serde", "platforms/serde"]
 
 # Modules
