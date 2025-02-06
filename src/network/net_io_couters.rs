@@ -9,8 +9,8 @@ use crate::network::net_io_counters_pernic;
 use crate::network::this_net_io_counters_pernic1;
 use crate::{Bytes, Count, Result};
 
-#[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
 #[derive(Clone, Debug, Add, Sum, Sub)]
 pub struct NetIoCounters {
 	pub(crate) bytes_sent: Bytes,

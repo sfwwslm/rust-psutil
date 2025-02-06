@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::Temperature;
 
-#[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
 #[derive(Debug, Clone)]
 pub struct TemperatureSensor {
 	pub(crate) unit: String,

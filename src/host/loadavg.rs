@@ -6,8 +6,8 @@ use serde_json::{json, Value};
 
 use crate::FloatCount;
 
-#[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
 #[derive(Debug)]
 pub struct LoadAvg {
 	/// 运行队列中平均超过 1 分钟的作业数。
