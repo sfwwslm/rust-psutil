@@ -49,7 +49,7 @@ fn hwmon_sensor(input: PathBuf) -> Result<TemperatureSensor> {
 	// that it is not a root directory and it points to a file.
 	// Otherwise it is an implementation bug.
 	let root = input.parent().unwrap_or_else(|| unreachable!());
-	let sensor_id: Option<String> = root
+	let hwmon_id: Option<String> = root
 		.file_name()
 		.and_then(|s| s.to_str().map(|s| s.to_string()));
 
@@ -106,7 +106,7 @@ fn hwmon_sensor(input: PathBuf) -> Result<TemperatureSensor> {
 		max,
 		crit,
 		min,
-		sensor_id,
+		hwmon_id,
 	})
 }
 
@@ -191,7 +191,7 @@ fn thermal_zone() -> Vec<Result<TemperatureSensor>> {
 				max,
 				crit,
 				min: None,
-				sensor_id: None,
+				hwmon_id: None,
 			})
 		})
 		.collect()
