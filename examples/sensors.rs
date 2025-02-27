@@ -1,138 +1,129 @@
-// use std::thread;
-// use std::time::Duration;
-
 use psutil::*;
 use std::collections::{BTreeMap, HashMap};
 
 fn main() {
-	// let block_time = Duration::from_millis(1000);
-	// thread::sleep(block_time);
+    let temperatures = sensors::temperatures();
+    
+    // Dictionaries to store sensor data categorized by type
+    let mut acpi_sensors = HashMap::new();
+    let mut cpu_sensors = BTreeMap::new();
+    let mut disk_sensors = HashMap::new();
 
-	let temperatures = sensors::temperatures();
-	let mut acpi_dict = HashMap::new();
-	let mut cpu_dict = BTreeMap::new();
-	let mut disk_dict = HashMap::new();
+    // Iterate over all temperature sensors
+    temperatures.iter().for_each(|sensor| {
+        if let Ok(temp_sensor) = sensor {
+            // Extract sensor id from hwmon
+            let sensor_id = temp_sensor.hwmon_id().unwrap_or("Unknown").to_string();
 
-	for s in temperatures.iter() {
-		if let Ok(temp) = s {
-			let sensor_id = temp.sensor_id().unwrap_or("未知").to_string();
-			// sensor_dict.entry(sensor_id.clone()).or_insert(Vec::new());
+            // Categorize the sensor by type (acpitz, nvme, coretemp)
+            match temp_sensor.unit() {
+                "acpitz" => {
+                    acpi_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+                    let msg = format!("Chipset: {:>3}°C", temp_sensor.current().celsius());
 
-			match temp.unit() {
-				"acpitz" => {
-					acpi_dict.entry(sensor_id.clone()).or_insert(Vec::new());
-					let msg = format!("主板温度: {:>3}°C", temp.current().celsius());
+                    acpi_sensors
+                        .get_mut(&sensor_id)
+                        .unwrap()
+                        .push(HashMap::from([("acpitz", msg)]));
+                }
+                "nvme" => {
+                    disk_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+                    let msg = format!(
+                        "NVME Disk: {:>3}°C Type: {:<9}  (Max = +{}°C, Critical = +{}°C, Min = {}°C)",
+                        temp_sensor.current().celsius(),
+                        temp_sensor.label().unwrap_or("Unknown"),
+                        temp_sensor.high().unwrap_or(&Temperature::new(0.0)).celsius(),
+                        temp_sensor.critical().unwrap_or(&Temperature::new(0.0)).celsius(),
+                        temp_sensor.min().unwrap_or(&Temperature::new(0.0)).celsius()
+                    );
 
-					acpi_dict
-						.get_mut(&sensor_id)
-						.unwrap()
-						.push(HashMap::from([("acpitz", msg)]));
-				}
-				"nvme" => {
-					disk_dict.entry(sensor_id.clone()).or_insert(Vec::new());
-					let msg = format!("NVME 硬盘温度: {:>3}°C 类型: {:<9}  (最高温度 = +{}°C, 临界温度 = +{}°C, 最低温度 = {}°C)",
-					temp.current().celsius(),
-					temp.label().unwrap_or("未知"),
-					temp.high().unwrap_or(&Temperature::new(0.0)).celsius(),
-					temp.critical().unwrap_or(&Temperature::new(0.0)).celsius(),
-					temp.min().unwrap_or(&Temperature::new(0.0)).celsius());
+                    disk_sensors
+                        .get_mut(&sensor_id)
+                        .unwrap()
+                        .push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
+                }
+                "coretemp" => {
+                    cpu_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+                    if let Some(label) = temp_sensor.label() {
+                        let core_num = label.split_whitespace().last().unwrap();
+                        if label.to_lowercase().contains("package") {
+                            let msg = format!(
+                                "Package {:>2}: {:>3}°C (Max = +{}°C, Critical = +{}°C)",
+                                core_num,
+                                temp_sensor.current().celsius(),
+                                temp_sensor.high().unwrap_or(&Temperature::new(0.0)).celsius(),
+                                temp_sensor.critical().unwrap_or(&Temperature::new(0.0)).celsius()
+                            );
+                            cpu_sensors
+                                .get_mut(&sensor_id)
+                                .unwrap()
+                                .push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
+                        } else {
+                            let msg = format!(
+                                "Core {:>2}: {:>6}°C (Max = +{}°C, Critical = +{}°C)",
+                                core_num,
+                                temp_sensor.current().celsius(),
+                                temp_sensor.high().unwrap_or(&Temperature::new(0.0)).celsius(),
+                                temp_sensor.critical().unwrap_or(&Temperature::new(0.0)).celsius()
+                            );
+                            cpu_sensors
+                                .get_mut(&sensor_id)
+                                .unwrap()
+                                .push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
+                        }
+                    }
+                }
+                _ => {
+                    // Unknown sensor type
+                }
+            };
+        }
+    });
 
-					disk_dict
-						.get_mut(&sensor_id)
-						.unwrap()
-						.push(HashMap::from([(temp.label().unwrap(), msg)]));
-				}
-				"coretemp" => {
-					cpu_dict.entry(sensor_id.clone()).or_insert(Vec::new());
-					if let Some(label) = temp.label() {
-						let num = label.split_whitespace().last().unwrap();
-						if label.to_lowercase().contains("package") {
-							let msg = format!(
-								"封装温度 {:>2}: {:>3}°C (最高温度 = +{}°C, 临界温度 = +{}°C)",
-								num,
-								temp.current().celsius(),
-								temp.high().unwrap_or(&Temperature::new(0.0)).celsius(),
-								temp.critical().unwrap_or(&Temperature::new(0.0)).celsius()
-							);
-							cpu_dict
-								.get_mut(&sensor_id)
-								.unwrap()
-								.push(HashMap::from([(temp.label().unwrap(), msg)]));
-						} else {
-							let msg = format!(
-								"核心温度 {:>2}: {:>3}°C (最高温度 = +{}°C, 临界温度 = +{}°C)",
-								num,
-								temp.current().celsius(),
-								temp.high().unwrap_or(&Temperature::new(0.0)).celsius(),
-								temp.critical().unwrap_or(&Temperature::new(0.0)).celsius()
-							);
-							cpu_dict
-								.get_mut(&sensor_id)
-								.unwrap()
-								.push(HashMap::from([(temp.label().unwrap(), msg)]));
-						}
-					}
-				}
-				_ => {
-					"未知";
-				}
-			};
-		}
-	}
+    // Output ACPI sensor data if available
+    if !acpi_sensors.is_empty() {
+        acpi_sensors.iter_mut().for_each(|(_sensor_id, values)| {
+            for value in values {
+                value.iter().for_each(|(_key, msg)| {
+                    println!("{}", msg);
+                });
+            }
+        });
+    }
 
-	if !acpi_dict.is_empty() {
-		for (sensors, vec_values) in acpi_dict.iter_mut() {
-			for value in vec_values {
-				let (key, value) = value.iter().next().unwrap();
-				println!("{}", value);
-			}
-		}
-		println!();
-	}
+    // Output CPU sensor data if available
+    if !cpu_sensors.is_empty() {
+        println!();
+        cpu_sensors.iter_mut().for_each(|(_sensor_id, values)| {
+            // Sort CPU cores by the number part of "Core X" (e.g., Core 0, Core 1)
+            values.sort_by_key(|map| {
+                let key = map.keys().next().unwrap(); // Get the key from the HashMap
+                if key.contains("Package") {
+                    return 0; // Make sure Package is at the front
+                }
+                key.split_whitespace()
+                    .nth(1)
+                    .and_then(|num| num.parse::<u32>().ok()) // Parse the number
+                    .map(|n| n + 1) // Ensure "Package id 0" (0) comes first
+                    .unwrap_or(u32::MAX) // If parsing fails, place it at the end
+            });
 
-	if !cpu_dict.is_empty() {
-		let dic_len = cpu_dict.len();
-		let mut loop_len = 0;
-		for (sensors, vec_values) in cpu_dict.iter_mut() {
-			// 按照 Core X 的数字部分进行排序
-			vec_values.sort_by_key(|map| {
-				let key = map.keys().next().unwrap(); // 获取 HashMap 的 key
-				if key.contains("Package") {
-					return 0; // 让它排在最前面
-				}
-				key.split_whitespace()
-					.nth(1)
-					.and_then(|num| num.parse::<u32>().ok()) // 解析为 u32
-					.map(|n| n + 1) //  // 确保 "Package id 0" (0) 排在最前
-					.unwrap_or(u32::MAX) // 解析失败放到最后
-			});
+            for value in values {
+                value.iter().for_each(|(_key, msg)| {
+                    println!("{}", msg);
+                });
+            }
+        });
+    }
 
-			// println!("{:?}",vec_values);
-			for value in vec_values {
-				let (key, value) = value.iter().next().unwrap();
-				println!("{}", value);
-			}
-			loop_len += 1;
-			if loop_len < dic_len {
-				println!();
-			}
-		}
-		println!();
-	}
-
-	if !disk_dict.is_empty() {
-		let dic_len = disk_dict.len();
-		let mut loop_len = 0;
-		for (sensors, vec_values) in disk_dict.iter_mut() {
-			for value in vec_values {
-				let (key, value) = value.iter().next().unwrap();
-				println!("{}", value);
-			}
-			loop_len += 1;
-			if loop_len < dic_len {
-				println!();
-			}
-		}
-		
-	}
+    // Output Disk sensor data if available
+    if !disk_sensors.is_empty() {
+        println!();
+        disk_sensors.iter_mut().for_each(|(_sensor_id, values)| {
+            for value in values {
+                let (_key, msg) = value.iter().next().unwrap();
+                println!("{}", msg);
+            }
+        });
+    }
 }
