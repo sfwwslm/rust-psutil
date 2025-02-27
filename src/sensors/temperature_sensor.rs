@@ -9,13 +9,11 @@ use crate::Temperature;
 pub struct TemperatureSensor {
 	pub(crate) unit: String,
 	pub(crate) label: Option<String>,
-	/// 当前温度
 	pub(crate) current: Temperature,
 	pub(crate) max: Option<Temperature>,
 	pub(crate) crit: Option<Temperature>,
 	pub(crate) min: Option<Temperature>,
-	/// 从`/sys/class/hwmon/hwmon0`中提取`hwmon0`作为传感器的id，用于标识传感器
-	pub(crate) sensor_id: Option<String>,
+	pub(crate) hwmon_id: Option<String>,
 }
 
 impl TemperatureSensor {
@@ -39,7 +37,7 @@ impl TemperatureSensor {
 		self.max.as_ref()
 	}
 
-	/// 在`nvme`硬盘上的最低温度
+	/// Returns min trip point for sensor if available.
 	pub fn min(&self) -> Option<&Temperature> {
 		self.min.as_ref()
 	}
@@ -49,7 +47,18 @@ impl TemperatureSensor {
 		self.crit.as_ref()
 	}
 
-	pub fn sensor_id(&self)->Option<&str>{
-		self.sensor_id.as_deref()
+	/// Returns the `hwmon_id` for the sensor if available.
+	/// 
+	/// Extracts the sensor ID from `/sys/class/hwmon/hwmon0` to identify the sensor.
+	/// 
+	/// # Example
+	/// 
+	/// If the `hwmon_id` is set to `Some("hwmon0")`, the method will return:
+	/// 
+	/// ```rust
+	/// Some("hwmon0")
+	/// ```
+	pub fn hwmon_id(&self)->Option<&str>{
+		self.hwmon_id.as_deref()
 	}
 }
