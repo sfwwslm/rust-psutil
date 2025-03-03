@@ -97,11 +97,11 @@ fn main() {
 				});
 			}
 		});
+        println!();
 	}
 
 	// Output CPU sensor data if available
 	if !cpu_sensors.is_empty() {
-		println!();
 		cpu_sensors.iter_mut().for_each(|(_sensor_id, values)| {
 			// Sort CPU cores by the number part of "Core X" (e.g., Core 0, Core 1)
 			values.sort_by_key(|map| {
@@ -122,6 +122,7 @@ fn main() {
 				});
 			}
 		});
+        println!();
 	}
 
 	// Output Disk sensor data if available
@@ -133,6 +134,7 @@ fn main() {
 				println!("{}", msg);
 			}
 		});
+        println!();
 	}
 
 	// Output Other sensor data if available
@@ -144,5 +146,6 @@ fn main() {
 				println!("{}", msg);
 			}
 		});
+        println!();
 	}
 }
