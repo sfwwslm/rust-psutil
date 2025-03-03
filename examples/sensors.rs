@@ -14,21 +14,21 @@ fn main() {
 	temperatures.iter().for_each(|sensor| {
         if let Ok(temp_sensor) = sensor {
             // Extract sensor id from hwmon
-            let sensor_id = temp_sensor.hwmon_id().unwrap_or("Unknown").to_string();
+            let hwmon_id = temp_sensor.hwmon_id().unwrap_or("Unknown").to_string();
 
             // Categorize the sensor by type (acpitz, nvme, coretemp)
             match temp_sensor.unit() {
                 "acpitz" => {
-                    acpi_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+                    acpi_sensors.entry(hwmon_id.clone()).or_insert(Vec::new());
                     let msg = format!("Chipset: {:>3}°C", temp_sensor.current().celsius());
 
                     acpi_sensors
-                        .get_mut(&sensor_id)
+                        .get_mut(&hwmon_id)
                         .unwrap()
                         .push(HashMap::from([("acpitz", msg)]));
                 }
                 "nvme" => {
-                    disk_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+                    disk_sensors.entry(hwmon_id.clone()).or_insert(Vec::new());
                     let msg = format!(
                         "NVME Disk: {:>3}°C Type: {:<9}  (Max = +{}°C, Critical = +{}°C, Min = {}°C)",
                         temp_sensor.current().celsius(),
@@ -39,12 +39,12 @@ fn main() {
                     );
 
                     disk_sensors
-                        .get_mut(&sensor_id)
+                        .get_mut(&hwmon_id)
                         .unwrap()
                         .push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
                 }
                 "coretemp" => {
-                    cpu_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+                    cpu_sensors.entry(hwmon_id.clone()).or_insert(Vec::new());
                     if let Some(label) = temp_sensor.label() {
                         let core_num = label.split_whitespace().last().unwrap();
                         if label.to_lowercase().contains("package") {
@@ -56,7 +56,7 @@ fn main() {
                                 temp_sensor.critical().unwrap_or(&Temperature::new(0.0)).celsius()
                             );
                             cpu_sensors
-                                .get_mut(&sensor_id)
+                                .get_mut(&hwmon_id)
                                 .unwrap()
                                 .push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
                         } else {
@@ -68,19 +68,19 @@ fn main() {
                                 temp_sensor.critical().unwrap_or(&Temperature::new(0.0)).celsius()
                             );
                             cpu_sensors
-                                .get_mut(&sensor_id)
+                                .get_mut(&hwmon_id)
                                 .unwrap()
                                 .push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
                         }
                     }
                 }
                 ref other => {
-                    other_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+                    other_sensors.entry(hwmon_id.clone()).or_insert(Vec::new());
                     let key = format!("Other {other}");
                     let msg = format!("{}: {:>3}°C", key,temp_sensor.current().celsius());
 
                     other_sensors
-                        .get_mut(&sensor_id)
+                        .get_mut(&hwmon_id)
                         .unwrap()
                         .push(HashMap::from([(key, msg)]));
                 }
@@ -90,7 +90,7 @@ fn main() {
 
 	// Output ACPI sensor data if available
 	if !acpi_sensors.is_empty() {
-		acpi_sensors.iter_mut().for_each(|(_sensor_id, values)| {
+		acpi_sensors.iter_mut().for_each(|(_hwmon_id, values)| {
 			for value in values {
 				value.iter().for_each(|(_key, msg)| {
 					println!("{}", msg);
@@ -102,7 +102,7 @@ fn main() {
 
 	// Output CPU sensor data if available
 	if !cpu_sensors.is_empty() {
-		cpu_sensors.iter_mut().for_each(|(_sensor_id, values)| {
+		cpu_sensors.iter_mut().for_each(|(_hwmon_id, values)| {
 			// Sort CPU cores by the number part of "Core X" (e.g., Core 0, Core 1)
 			values.sort_by_key(|map| {
 				let key = map.keys().next().unwrap(); // Get the key from the HashMap
@@ -128,7 +128,7 @@ fn main() {
 	// Output Disk sensor data if available
 	if !disk_sensors.is_empty() {
 		println!();
-		disk_sensors.iter_mut().for_each(|(_sensor_id, values)| {
+		disk_sensors.iter_mut().for_each(|(_hwmon_id, values)| {
 			for value in values {
 				let (_key, msg) = value.iter().next().unwrap();
 				println!("{}", msg);
@@ -140,7 +140,7 @@ fn main() {
 	// Output Other sensor data if available
 	if !other_sensors.is_empty() {
 		println!();
-		other_sensors.iter_mut().for_each(|(_sensor_id, values)| {
+		other_sensors.iter_mut().for_each(|(_hwmon_id, values)| {
 			for value in values {
 				let (_key, msg) = value.iter().next().unwrap();
 				println!("{}", msg);
