@@ -10,7 +10,7 @@ description = "Process and system monitoring library"
 repository = "https://github.com/rust-psutil/rust-psutil"
 readme = "README.md"
 license = "MIT"
-edition = "2018"
+edition = "2024"
 
 [dependencies]
 cfg-if = "1.0.0"
@@ -40,7 +40,8 @@ disk = ["derive_more", "unescape"]
 host = ["platforms"]
 memory = ["mach2"]
 network = ["derive_more"]
-process = ["darwin-libproc", "mach2", "memory"]
+process = ["memory"]
+process-macos = ["darwin-libproc", "mach2", "memory"]
 sensors = ["glob"]
 
 [dev-dependencies]
