@@ -1,9 +1,14 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use std::path::Path;
 
 use nix::sys;
 
 use crate::{Bytes, Percent, Result};
 
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
 #[derive(Clone, Debug, Default)]
 pub struct DiskUsage {
 	pub(crate) total: Bytes,
