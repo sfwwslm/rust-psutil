@@ -1,6 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "serde")]
+use crate::duration_serde;
+
 use std::ops::Sub;
 use std::time::Duration;
 
@@ -9,22 +12,41 @@ use std::time::Duration;
 #[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CpuTimes {
+	#[cfg_attr(feature = "serde", serde(serialize_with = "duration_serde::serialize"))]
 	pub(crate) user: Duration,
+	#[cfg_attr(feature = "serde", serde(serialize_with = "duration_serde::serialize"))]
 	pub(crate) system: Duration,
+	#[cfg_attr(feature = "serde", serde(serialize_with = "duration_serde::serialize"))]
 	pub(crate) idle: Duration,
+	#[cfg_attr(feature = "serde", serde(serialize_with = "duration_serde::serialize"))]
 	pub(crate) nice: Duration,
 
 	#[cfg(target_os = "linux")]
+	#[cfg_attr(feature = "serde", serde(serialize_with = "duration_serde::serialize"))]
 	pub(crate) iowait: Duration,
 	#[cfg(target_os = "linux")]
+	#[cfg_attr(feature = "serde", serde(serialize_with = "duration_serde::serialize"))]
 	pub(crate) irq: Duration,
 	#[cfg(target_os = "linux")]
+	#[cfg_attr(feature = "serde", serde(serialize_with = "duration_serde::serialize"))]
 	pub(crate) softirq: Duration,
 	#[cfg(target_os = "linux")]
+	#[cfg_attr(
+		feature = "serde",
+		serde(serialize_with = "duration_serde::serialize_opt")
+	)]
 	pub(crate) steal: Option<Duration>,
 	#[cfg(target_os = "linux")]
+	#[cfg_attr(
+		feature = "serde",
+		serde(serialize_with = "duration_serde::serialize_opt")
+	)]
 	pub(crate) guest: Option<Duration>,
 	#[cfg(target_os = "linux")]
+	#[cfg_attr(
+		feature = "serde",
+		serde(serialize_with = "duration_serde::serialize_opt")
+	)]
 	pub(crate) guest_nice: Option<Duration>,
 }
 

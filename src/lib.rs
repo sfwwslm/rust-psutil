@@ -26,6 +26,9 @@
 #[cfg(feature = "serde")]
 extern crate renamed_serde as serde;
 
+#[cfg(feature = "serde")]
+mod duration_serde;
+
 #[macro_use]
 mod utils;
 pub mod common;
