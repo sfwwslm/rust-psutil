@@ -1,5 +1,5 @@
-use crate::memory::VirtualMemory;
 use crate::Bytes;
+use crate::memory::VirtualMemory;
 
 pub trait VirtualMemoryExt {
 	fn buffers(&self) -> Bytes;

@@ -1,8 +1,8 @@
 use std::convert::TryFrom;
 use std::str::FromStr;
 
-use crate::process::Status;
 use crate::ParseStatusError;
+use crate::process::Status;
 
 /// Returns a Status based on a status character from `/proc/[pid]/stat`.
 ///

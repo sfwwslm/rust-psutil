@@ -1,6 +1,6 @@
-use crate::memory::{make_map, SwapMemory};
+use crate::memory::{SwapMemory, make_map};
 use crate::utils::u64_percent;
-use crate::{read_file, Error, Result};
+use crate::{Error, Result, read_file};
 
 const PROC_MEMINFO: &str = "/proc/meminfo";
 const PROC_VMSTAT: &str = "/proc/vmstat";

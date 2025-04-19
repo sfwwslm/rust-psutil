@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use crate::host::LoadAvg;
-use crate::{read_file, Error, Result};
+use crate::{Error, Result, read_file};
 
 const PROC_LOADAVG: &str = "/proc/loadavg";
 

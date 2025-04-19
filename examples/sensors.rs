@@ -12,81 +12,102 @@ fn main() {
 
 	// Iterate over all temperature sensors
 	temperatures.iter().for_each(|sensor| {
-        if let Ok(temp_sensor) = sensor {
-            // Extract sensor id from hwmon
-            let sensor_id = temp_sensor.hwmon_id().unwrap_or("Unknown").to_string();
+		if let Ok(temp_sensor) = sensor {
+			// Extract sensor id from hwmon
+			let sensor_id = temp_sensor.hwmon_id().unwrap_or("Unknown").to_string();
 
-            // Categorize the sensor by type (acpitz, nvme, coretemp)
-            match temp_sensor.unit() {
-                "acpitz" => {
-                    acpi_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
-                    let msg = format!("Chipset: {:>3}°C", temp_sensor.current().celsius());
+			// Categorize the sensor by type (acpitz, nvme, coretemp)
+			match temp_sensor.unit() {
+				"acpitz" => {
+					acpi_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+					let msg = format!("Chipset: {:>3}°C", temp_sensor.current().celsius());
 
-                    acpi_sensors
-                        .get_mut(&sensor_id)
-                        .unwrap()
-                        .push(HashMap::from([("acpitz", msg)]));
-                }
-                "nvme" => {
-                    disk_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
-                    let msg = format!(
-                        "NVME Disk: {:>3}°C Type: {:<9}  (Max = +{}°C, Critical = +{}°C, Min = {}°C)",
-                        temp_sensor.current().celsius(),
-                        temp_sensor.label().unwrap_or("Unknown"),
-                        temp_sensor.high().unwrap_or(&Temperature::new(0.0)).celsius(),
-                        temp_sensor.critical().unwrap_or(&Temperature::new(0.0)).celsius(),
-                        temp_sensor.min().unwrap_or(&Temperature::new(0.0)).celsius()
-                    );
+					acpi_sensors
+						.get_mut(&sensor_id)
+						.unwrap()
+						.push(HashMap::from([("acpitz", msg)]));
+				}
+				"nvme" => {
+					disk_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+					let msg = format!(
+						"NVME Disk: {:>3}°C Type: {:<9}  (Max = +{}°C, Critical = +{}°C, Min = {}°C)",
+						temp_sensor.current().celsius(),
+						temp_sensor.label().unwrap_or("Unknown"),
+						temp_sensor
+							.high()
+							.unwrap_or(&Temperature::new(0.0))
+							.celsius(),
+						temp_sensor
+							.critical()
+							.unwrap_or(&Temperature::new(0.0))
+							.celsius(),
+						temp_sensor
+							.min()
+							.unwrap_or(&Temperature::new(0.0))
+							.celsius()
+					);
 
-                    disk_sensors
-                        .get_mut(&sensor_id)
-                        .unwrap()
-                        .push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
-                }
-                "coretemp" => {
-                    cpu_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
-                    if let Some(label) = temp_sensor.label() {
-                        let core_num = label.split_whitespace().last().unwrap();
-                        if label.to_lowercase().contains("package") {
-                            let msg = format!(
-                                "Package {:>2}: {:>3}°C (Max = +{}°C, Critical = +{}°C)",
-                                core_num,
-                                temp_sensor.current().celsius(),
-                                temp_sensor.high().unwrap_or(&Temperature::new(0.0)).celsius(),
-                                temp_sensor.critical().unwrap_or(&Temperature::new(0.0)).celsius()
-                            );
-                            cpu_sensors
-                                .get_mut(&sensor_id)
-                                .unwrap()
-                                .push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
-                        } else {
-                            let msg = format!(
-                                "Core {:>2}: {:>6}°C (Max = +{}°C, Critical = +{}°C)",
-                                core_num,
-                                temp_sensor.current().celsius(),
-                                temp_sensor.high().unwrap_or(&Temperature::new(0.0)).celsius(),
-                                temp_sensor.critical().unwrap_or(&Temperature::new(0.0)).celsius()
-                            );
-                            cpu_sensors
-                                .get_mut(&sensor_id)
-                                .unwrap()
-                                .push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
-                        }
-                    }
-                }
-                ref other => {
-                    other_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
-                    let key = format!("Other {other}");
-                    let msg = format!("{}: {:>3}°C", key,temp_sensor.current().celsius());
+					disk_sensors
+						.get_mut(&sensor_id)
+						.unwrap()
+						.push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
+				}
+				"coretemp" => {
+					cpu_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+					if let Some(label) = temp_sensor.label() {
+						let core_num = label.split_whitespace().last().unwrap();
+						if label.to_lowercase().contains("package") {
+							let msg = format!(
+								"Package {:>2}: {:>3}°C (Max = +{}°C, Critical = +{}°C)",
+								core_num,
+								temp_sensor.current().celsius(),
+								temp_sensor
+									.high()
+									.unwrap_or(&Temperature::new(0.0))
+									.celsius(),
+								temp_sensor
+									.critical()
+									.unwrap_or(&Temperature::new(0.0))
+									.celsius()
+							);
+							cpu_sensors
+								.get_mut(&sensor_id)
+								.unwrap()
+								.push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
+						} else {
+							let msg = format!(
+								"Core {:>2}: {:>6}°C (Max = +{}°C, Critical = +{}°C)",
+								core_num,
+								temp_sensor.current().celsius(),
+								temp_sensor
+									.high()
+									.unwrap_or(&Temperature::new(0.0))
+									.celsius(),
+								temp_sensor
+									.critical()
+									.unwrap_or(&Temperature::new(0.0))
+									.celsius()
+							);
+							cpu_sensors
+								.get_mut(&sensor_id)
+								.unwrap()
+								.push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
+						}
+					}
+				}
+				ref other => {
+					other_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
+					let key = format!("Other {other}");
+					let msg = format!("{}: {:>3}°C", key, temp_sensor.current().celsius());
 
-                    other_sensors
-                        .get_mut(&sensor_id)
-                        .unwrap()
-                        .push(HashMap::from([(key, msg)]));
-                }
-            };
-        }
-    });
+					other_sensors
+						.get_mut(&sensor_id)
+						.unwrap()
+						.push(HashMap::from([(key, msg)]));
+				}
+			};
+		}
+	});
 
 	// Output ACPI sensor data if available
 	if !acpi_sensors.is_empty() {

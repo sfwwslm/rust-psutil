@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 
 use std::path::{Path, PathBuf};
 
-use crate::disk::{partitions, FileSystem};
 use crate::Result;
+use crate::disk::{FileSystem, partitions};
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]

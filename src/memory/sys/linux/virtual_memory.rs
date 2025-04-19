@@ -1,5 +1,5 @@
-use crate::memory::{make_map, VirtualMemory};
-use crate::{read_file, Error, Result};
+use crate::memory::{VirtualMemory, make_map};
+use crate::{Error, Result, read_file};
 
 const PROC_MEMINFO: &str = "/proc/meminfo";
 

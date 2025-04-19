@@ -8,8 +8,8 @@ use std::ptr;
 use mach2::{boolean, vm_types};
 use nix::{errno, libc};
 
-use crate::process::{io_error_to_process_error, ProcessError, ProcessResult};
 use crate::Pid;
+use crate::process::{ProcessError, ProcessResult, io_error_to_process_error};
 
 #[allow(non_camel_case_types)]
 type caddr_t = *const libc::c_char;

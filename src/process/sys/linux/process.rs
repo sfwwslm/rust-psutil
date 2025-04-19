@@ -3,12 +3,12 @@ use std::string::ToString;
 use std::time::Instant;
 
 use crate::common::NetConnectionType;
-use crate::process::os::linux::{procfs_stat, ProcessExt as _};
+use crate::process::os::linux::{ProcessExt as _, procfs_stat};
 use crate::process::{
-	pids, psutil_error_to_process_error, MemType, MemoryInfo, OpenFile, Process, ProcessCpuTimes,
-	ProcessResult, Status,
+	MemType, MemoryInfo, OpenFile, Process, ProcessCpuTimes, ProcessResult, Status, pids,
+	psutil_error_to_process_error,
 };
-use crate::{read_dir, read_file, read_link, Count, Percent, Pid, Result};
+use crate::{Count, Percent, Pid, Result, read_dir, read_file, read_link};
 
 /// Returns a path to a file in `/proc/[pid]/`.
 pub(crate) fn procfs_path(pid: Pid, name: &str) -> PathBuf {

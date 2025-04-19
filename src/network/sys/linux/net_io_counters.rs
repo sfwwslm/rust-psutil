@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 
 use crate::network::NetIoCounters;
-use crate::{read_file, Error, Result};
+use crate::{Error, Result, read_file};
 
 const PROC_NET_DEV: &str = "/proc/net/dev";
 

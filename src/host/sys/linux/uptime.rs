@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::{read_file, Error, Result};
+use crate::{Error, Result, read_file};
 
 const PROC_UPTIME: &str = "/proc/uptime";
 

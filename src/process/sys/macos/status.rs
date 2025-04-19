@@ -4,8 +4,8 @@ use std::convert::TryFrom;
 
 use nix::libc;
 
-use crate::process::Status;
 use crate::ParseStatusError;
+use crate::process::Status;
 
 // Process status values, declared at `bsd/sys/proc.h`
 // ex. http://fxr.watson.org/fxr/source/bsd/sys/proc.h?v=xnu-792.6.70#L149

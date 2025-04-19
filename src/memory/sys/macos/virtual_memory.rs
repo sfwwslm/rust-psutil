@@ -8,8 +8,8 @@ use std::ptr;
 
 use nix::libc;
 
-use crate::memory::{host_vm_info, VirtualMemory};
-use crate::{Result, PAGE_SIZE};
+use crate::memory::{VirtualMemory, host_vm_info};
+use crate::{PAGE_SIZE, Result};
 
 const CTL_HW: libc::c_int = 6;
 const HW_MEMSIZE: libc::c_int = 24;

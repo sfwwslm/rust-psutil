@@ -4,10 +4,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::Bytes;
 
-#[cfg(target_os = "linux")]
-use crate::process::os::linux::ProcfsStatm;
 #[cfg(target_os = "macos")]
 use crate::Count;
+#[cfg(target_os = "linux")]
+use crate::process::os::linux::ProcfsStatm;
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]

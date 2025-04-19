@@ -18,7 +18,7 @@ pub const MNT_NOWAIT: libc::c_int = 2;
 
 extern "C" {
 	fn getfsstat64(buf: *mut libc::statfs, bufsize: libc::c_int, flags: libc::c_int)
-		-> libc::c_int;
+	-> libc::c_int;
 }
 
 // TODO: Since `MNT_NOWAIT` might return inconsistent data (see `getfsstat(2)`)

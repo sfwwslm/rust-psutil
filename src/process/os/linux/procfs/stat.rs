@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use std::time::Duration;
 
-use crate::process::{procfs_path, psutil_error_to_process_error, ProcessResult, Status};
-use crate::{read_file, Error, Pid, Result, PAGE_SIZE, TICKS_PER_SECOND};
+use crate::process::{ProcessResult, Status, procfs_path, psutil_error_to_process_error};
+use crate::{Error, PAGE_SIZE, Pid, Result, TICKS_PER_SECOND, read_file};
 
 const STAT: &str = "stat";
 

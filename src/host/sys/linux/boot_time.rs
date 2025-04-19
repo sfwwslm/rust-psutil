@@ -1,6 +1,6 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use crate::{read_file, Error, Result};
+use crate::{Error, Result, read_file};
 
 const PROC_STAT: &str = "/proc/stat";
 

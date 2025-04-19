@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use crate::process::{Process, ProcessResult};
 use crate::Count;
+use crate::process::{Process, ProcessResult};
 
 pub struct IoCounters {}
 

@@ -6,14 +6,14 @@ use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
-use nix::sys::signal::{kill, Signal};
+use nix::sys::signal::{Signal, kill};
 use nix::unistd;
 
 use crate::common::NetConnectionType;
 use crate::memory;
 use crate::process::{
-	psutil_error_to_process_error, MemType, MemoryInfo, OpenFile, ProcessCpuTimes, ProcessError,
-	ProcessResult, Status,
+	MemType, MemoryInfo, OpenFile, ProcessCpuTimes, ProcessError, ProcessResult, Status,
+	psutil_error_to_process_error,
 };
 use crate::utils::duration_percent;
 use crate::{Count, Percent, Pid};

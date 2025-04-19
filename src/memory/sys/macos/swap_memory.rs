@@ -8,8 +8,8 @@ use std::ptr;
 
 use nix::libc;
 
-use crate::memory::{host_vm_info, SwapMemory};
-use crate::{Result, PAGE_SIZE};
+use crate::memory::{SwapMemory, host_vm_info};
+use crate::{PAGE_SIZE, Result};
 
 const CTL_VM: libc::c_int = 2;
 const VM_SWAPUSAGE: libc::c_int = 5;

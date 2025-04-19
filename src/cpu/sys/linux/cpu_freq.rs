@@ -3,10 +3,10 @@ use std::path::PathBuf;
 
 use glob::glob;
 
-use crate::cpu::cpu_count;
 use crate::cpu::CpuFreq;
+use crate::cpu::cpu_count;
 use crate::types::FloatCount;
-use crate::{read_file, Error, Result};
+use crate::{Error, Result, read_file};
 
 pub fn cpu_freq() -> io::Result<CpuFreq> {
 	todo!()

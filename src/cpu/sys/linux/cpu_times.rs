@@ -2,7 +2,7 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use crate::cpu::CpuTimes;
-use crate::{read_file, Count, Error, Result, TICKS_PER_SECOND};
+use crate::{Count, Error, Result, TICKS_PER_SECOND, read_file};
 
 const PROC_STAT: &str = "/proc/stat";
 

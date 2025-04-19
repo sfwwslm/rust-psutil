@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
-use crate::process::{procfs_path, psutil_error_to_process_error, ProcessResult};
-use crate::{read_file, Error, Pid, Result, PAGE_SIZE};
+use crate::process::{ProcessResult, procfs_path, psutil_error_to_process_error};
+use crate::{Error, PAGE_SIZE, Pid, Result, read_file};
 
 const STATM: &str = "statm";
 

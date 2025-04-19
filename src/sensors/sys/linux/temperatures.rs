@@ -6,7 +6,7 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
 
 use crate::sensors::TemperatureSensor;
-use crate::{glob, read_file, Error, Result, Temperature};
+use crate::{Error, Result, Temperature, glob, read_file};
 
 #[inline]
 fn file_name(prefix: &OsStr, postfix: &[u8]) -> OsString {

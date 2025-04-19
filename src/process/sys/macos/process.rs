@@ -11,8 +11,8 @@ use nix::libc;
 use crate::common::NetConnectionType;
 use crate::process::os::macos::{kinfo_proc, kinfo_process, kinfo_processes};
 use crate::process::{
-	io_error_to_process_error, psutil_error_to_process_error, MemType, MemoryInfo, OpenFile,
-	Process, ProcessCpuTimes, ProcessError, ProcessResult, Status,
+	MemType, MemoryInfo, OpenFile, Process, ProcessCpuTimes, ProcessError, ProcessResult, Status,
+	io_error_to_process_error, psutil_error_to_process_error,
 };
 use crate::{Count, Error, Percent, Pid, Result};
 

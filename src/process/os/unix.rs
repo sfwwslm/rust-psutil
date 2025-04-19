@@ -1,5 +1,5 @@
-use crate::process::{Process, ProcessResult};
 use crate::Count;
+use crate::process::{Process, ProcessResult};
 
 #[cfg(target_os = "linux")]
 use crate::process::os::linux::{ProcessExt as _, ProcfsStatus};

@@ -1,8 +1,8 @@
 use std::time::Instant;
 
+use crate::Percent;
 use crate::process::{Process, ProcessCpuTimes};
 use crate::utils::duration_percent;
-use crate::Percent;
 
 pub trait Oneshot {
 	fn name_oneshot(&self) -> String;

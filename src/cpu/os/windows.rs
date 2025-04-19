@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-use crate::cpu::{CpuTimes, CpuTimesPercent};
 use crate::Percent;
+use crate::cpu::{CpuTimes, CpuTimesPercent};
 
 pub trait CpuTimesExt {
 	fn interrupt(&self) -> Duration;

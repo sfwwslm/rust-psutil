@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use crate::process::os::linux::{
-	procfs_stat, procfs_statm, procfs_status, ProcfsStat, ProcfsStatm, ProcfsStatus,
+	ProcfsStat, ProcfsStatm, ProcfsStatus, procfs_stat, procfs_statm, procfs_status,
 };
-use crate::process::{psutil_error_to_process_error, Process, ProcessResult};
-use crate::{read_file, Error, Result};
+use crate::process::{Process, ProcessResult, psutil_error_to_process_error};
+use crate::{Error, Result, read_file};
 
 fn parse_environ(contents: &str) -> Result<HashMap<String, String>> {
 	contents

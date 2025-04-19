@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-use crate::disk::DiskIoCounters;
 use crate::Count;
+use crate::disk::DiskIoCounters;
 
 pub trait DiskIoCountersExt {
 	/// Time spent reading from disk.

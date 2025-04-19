@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use unescape::unescape;
 
-use crate::{read_file, Error, Result};
+use crate::{Error, Result, read_file};
 
 use crate::disk::{FileSystem, Partition};
 

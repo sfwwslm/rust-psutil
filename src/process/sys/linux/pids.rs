@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::{read_dir, Pid, Result};
+use crate::{Pid, Result, read_dir};
 
 // TODO: should we return an `io::Result<Vec<io::Result<<Pid>>>` instead?
 pub fn pids() -> Result<Vec<Pid>> {

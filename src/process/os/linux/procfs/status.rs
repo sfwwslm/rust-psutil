@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::str::FromStr;
 
 use crate::process::os::unix::{Gid, Uid};
-use crate::process::{procfs_path, psutil_error_to_process_error, ProcessResult};
-use crate::{read_file, Error, Pid, Result};
+use crate::process::{ProcessResult, procfs_path, psutil_error_to_process_error};
+use crate::{Error, Pid, Result, read_file};
 
 const STATUS: &str = "status";
 

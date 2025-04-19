@@ -5,7 +5,7 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use crate::disk::DiskIoCounters;
-use crate::{read_file, Error, Result};
+use crate::{Error, Result, read_file};
 
 // Copied from the `psutil` sources:
 //
