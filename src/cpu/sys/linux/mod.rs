@@ -1,4 +1,5 @@
 mod cpu_freq;
+mod cpu_info;
 mod cpu_stats;
 mod cpu_times;
 
