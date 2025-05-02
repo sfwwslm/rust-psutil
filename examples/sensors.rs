@@ -2,6 +2,9 @@ use psutil::*;
 use std::collections::{BTreeMap, HashMap};
 
 fn main() {
+	let topology = cpu::CpuTopology::parse_cpuinfo().unwrap();
+	let core_ids = topology.group_by_core_id();
+
 	let temperatures = sensors::temperatures();
 
 	// Dictionaries to store sensor data categorized by type
@@ -55,11 +58,11 @@ fn main() {
 				"coretemp" => {
 					cpu_sensors.entry(sensor_id.clone()).or_insert(Vec::new());
 					if let Some(label) = temp_sensor.label() {
-						let core_num = label.split_whitespace().last().unwrap();
+						let core_id = label.split_whitespace().last().unwrap();
 						if label.to_lowercase().contains("package") {
 							let msg = format!(
 								"Package {:>2}: {:>3}°C (Max = +{}°C, Critical = +{}°C)",
-								core_num,
+								core_id,
 								temp_sensor.current().celsius(),
 								temp_sensor
 									.high()
@@ -76,8 +79,21 @@ fn main() {
 								.push(HashMap::from([(temp_sensor.label().unwrap(), msg)]));
 						} else {
 							let msg = format!(
-								"Core {:>2}: {:>6}°C (Max = +{}°C, Critical = +{}°C)",
-								core_num,
+								"Core({}) {:>2}: {:>6}°C (Max = +{}°C, Critical = +{}°C)",
+								if core_ids
+									.get(&core_id.parse::<u64>().unwrap())
+									.unwrap()
+									.len() > 1
+								{
+									"P"
+								} else {
+									"E"
+								},
+								core_ids
+									.get(&core_id.parse::<u64>().unwrap())
+									.unwrap()
+									.first()
+									.unwrap(),
 								temp_sensor.current().celsius(),
 								temp_sensor
 									.high()
