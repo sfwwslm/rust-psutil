@@ -76,23 +76,33 @@ impl CpuTopology {
 		core_set.len()
 	}
 
-	/// 根据 physical_id + core_id 找 processor
-	pub fn find_processor_by_core_id(
-		&self,
-		physical_id: PhysicalId,
-		core_id: u64,
-	) -> Option<Processor> {
+	/// 根据 core_id 找 processor
+	pub fn find_processor_by_core_id(&self, core_id: u64) -> Option<Processor> {
 		self.packages
-			.get(&physical_id)?
-			.processors
 			.iter()
-			.find_map(|(&processor, cpu_info)| {
+			.flat_map(|(_, package)| &package.processors)
+			.find_map(|(processor_id, cpu_info)| {
 				if cpu_info.core_id() == core_id {
-					Some(processor)
+					Some(processor_id.clone())
 				} else {
 					None
 				}
 			})
+	}
+
+	///  按 core_id 分组，收集属于每个核心的处理器 ID
+	pub fn group_by_core_id(&self) -> HashMap<Count, Vec<&u64>> {
+		let mut map = HashMap::new();
+
+		for (_, package) in &self.packages {
+			for (processor_id, cpu_info) in &package.processors {
+				map.entry(cpu_info.core_id())
+					.or_insert_with(Vec::new)
+					.push(processor_id);
+			}
+		}
+
+		map
 	}
 
 	/// 根据 physical_id + processor 找 CpuInfo
