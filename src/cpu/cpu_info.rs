@@ -4,27 +4,16 @@ use serde::{Deserialize, Serialize};
 use crate::{Count, Mhz};
 use std::collections::BTreeMap;
 
-/// 物理 CPU 的编号（physical_id）
-pub type PhysicalId = u64;
-
 /// 逻辑核心的编号（processor）
 pub type Processor = u64;
 
-/// 描述一整颗物理CPU上所有逻辑核心的信息
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
-#[derive(Debug, Clone)]
-pub struct PhysicalPackage {
-	/// 物理 CPU 下的逻辑核心们（按 processor 排序）
-	pub processors: BTreeMap<Processor, CpuInfo>,
-}
-
+/// 描述物理CPU上所有逻辑核心的信息
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(crate = "renamed_serde"))]
 #[derive(Debug, Clone)]
 pub struct CpuTopology {
-	/// 所有物理 CPU，按 physical_id 区分
-	pub packages: BTreeMap<PhysicalId, PhysicalPackage>,
+	/// 物理 CPU 下的逻辑核心们（按 processor 排序）
+	pub cores: BTreeMap<Processor, CpuInfo>,
 }
 
 /// 表示从 `/proc/cpuinfo` 中提取的单个 CPU 核心信息。

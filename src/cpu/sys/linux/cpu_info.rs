@@ -1,9 +1,9 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use crate::{Count, Mhz, Result, read_file};
 const PROC_CPUINFO: &str = "/proc/cpuinfo";
 
-use crate::cpu::{CpuInfo, CpuTopology, PhysicalId, PhysicalPackage, Processor};
+use crate::cpu::{CpuInfo, CpuTopology, Processor};
 
 impl CpuTopology {
 	pub fn parse_cpuinfo() -> Result<Self> {
@@ -35,98 +35,71 @@ impl CpuTopology {
 		}
 
 		// 构建最终的结构
-		let mut packages: BTreeMap<PhysicalId, PhysicalPackage> = BTreeMap::new();
+		let mut cores: BTreeMap<Processor, CpuInfo> = BTreeMap::new();
 
 		for cpu in cpus {
-			let physical_id = cpu.physical_id() as PhysicalId;
 			let processor = cpu.processor() as Processor;
 
-			packages
-				.entry(physical_id)
-				.or_insert_with(|| PhysicalPackage {
-					processors: BTreeMap::new(),
-				})
-				.processors
-				.insert(processor, cpu);
+			cores.entry(processor).or_insert_with(|| cpu);
 		}
 
-		Ok(CpuTopology { packages })
+		Ok(CpuTopology { cores })
 	}
 }
 
 impl CpuTopology {
-	/// 查询某个物理CPU的所有逻辑核心
-	pub fn get_physical_package(&self, physical_id: PhysicalId) -> Option<&PhysicalPackage> {
-		self.packages.get(&physical_id)
-	}
-
-	/// 查询总逻辑核心数
-	pub fn total_logical_cores(&self) -> usize {
-		self.packages.values().map(|pkg| pkg.processors.len()).sum()
+	/// 物理CPU数量
+	pub fn physical_count(&self) -> usize {
+		self.cores
+			.values()
+			.map(|cpuinfo| cpuinfo.physical_id())
+			.collect::<HashSet<_>>()
+			.len()
 	}
 
 	/// 查询总物理核心数
 	pub fn total_physical_cores(&self) -> usize {
-		let mut core_set = std::collections::HashSet::new();
-		for package in self.packages.values() {
-			for cpu_info in package.processors.values() {
-				core_set.insert((cpu_info.physical_id(), cpu_info.core_id()));
-			}
-		}
-		core_set.len()
+		self.cores
+			.values()
+			.map(|cpuinfo| (cpuinfo.core_id()))
+			.collect::<HashSet<_>>()
+			.len()
+	}
+
+	/// 查询总逻辑核心数
+	pub fn total_logical_cores(&self) -> usize {
+		self.cores.len()
 	}
 
 	/// 根据 core_id 找 processor
 	pub fn find_processor_by_core_id(&self, core_id: u64) -> Option<Processor> {
-		self.packages
-			.iter()
-			.flat_map(|(_, package)| &package.processors)
-			.find_map(|(processor_id, cpu_info)| {
-				if cpu_info.core_id() == core_id {
-					Some(processor_id.clone())
-				} else {
-					None
-				}
-			})
+		self.cores.iter().find_map(|(processor, cpuinfo)| {
+			if cpuinfo.core_id() == core_id {
+				Some(processor.clone())
+			} else {
+				None
+			}
+		})
 	}
 
 	///  按 core_id 分组，收集属于每个核心的处理器 ID
 	pub fn group_by_core_id(&self) -> HashMap<Count, Vec<&u64>> {
 		let mut map = HashMap::new();
 
-		for (_, package) in &self.packages {
-			for (processor_id, cpu_info) in &package.processors {
-				map.entry(cpu_info.core_id())
-					.or_insert_with(Vec::new)
-					.push(processor_id);
-			}
+		for (processor_id, cpuinfo) in self.cores.iter() {
+			map.entry(cpuinfo.core_id())
+				.or_insert_with(Vec::new)
+				.push(processor_id);
 		}
 
 		map
 	}
 
-	/// 根据 physical_id + processor 找 CpuInfo
-	pub fn get_cpu_info(&self, physical_id: PhysicalId, processor: Processor) -> Option<&CpuInfo> {
-		self.packages.get(&physical_id)?.processors.get(&processor)
-	}
-
-	/// 物理CPU数量
-	pub fn physical_count(&self) -> usize {
-		self.packages.len()
-	}
-
-	/// 返回每个逻辑核心的 CPU 频率，键为 (physical_id, processor_id)。
-	pub fn cpu_freq(&self) -> BTreeMap<(PhysicalId, Processor), Mhz> {
-		self.packages
+	/// 返回每个逻辑核心的 CPU 频率。
+	pub fn cpu_freq(&self) -> BTreeMap<Processor, Mhz> {
+		self.cores
 			.iter()
-			.flat_map(|(physical_id, package)| {
-				package
-					.processors
-					.iter()
-					.map(move |(processor_id, cpu_info)| {
-						((*physical_id, *processor_id), cpu_info.cpu_mhz())
-					})
-			})
+			.map(|(processor_id, cpuinfo)| (*processor_id, cpuinfo.cpu_mhz()))
 			.collect()
 	}
 }
